@@ -1,0 +1,14 @@
+[Unit]
+Description=t agent service
+
+
+[Service]
+ExecStart=/opt/ed/agent/agent  -c /opt/ed/config.yml
+SyslogIdentifier=tagent
+Restart=on-failure
+RestartSec=5
+StartLimitIntervalSec=0
+StartLimitBurst=3
+
+[Install]
+WantedBy=multi-user.target

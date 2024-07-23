@@ -1,0 +1,74 @@
+queue.mem:
+  events: 4096         # 内存队列中的最大事件数量
+  flush.min_events: 512  # 强制刷新最小事件数
+  flush.timeout: 5s    # 刷新超时时间
+# ============================= input ==================================
+
+filebeat.inputs:
+
+#- type: filestream
+#  id: my-filestream-id
+#  enabled: true
+#  start_position: end  # 从文件的最新位置开始读取
+#  ignore_older: 24h   # 忽略特定时间段之前的日志文件
+#  close_eof: true   # 在读取到文件末尾时关闭文件，等待新的日志条目
+#  paths:
+#    - /var/log/*.log
+#    - /var/log/messages
+#    - /var/log/firewall
+#    - /var/log/secure
+#    - /data/log/*/*.log
+  - type: log
+    enabled: true
+    paths:
+      - /var/log/*.log
+      - /var/log/messages
+      - /var/log/firewall
+      - /var/log/secure
+      - /data/log/*/*.log
+    scan_frequency: 10s  # 扫描新文件的频率
+    harvester_limit: 5  # 设置同时读取文件的最大数量
+    close_inactive: 5m # 在没有新事件一段时间后关闭文件
+    close_timeout: 1h   # 无论文件是否活跃，都在指定时间后关闭文件
+    close_removed: true # 在读取到文件末尾时关闭文件
+    close_renamed: false # 在文件被删除时关闭文件
+    close_eof: true     #在文件被重命名时关闭文件
+    ignore_older: 2400h  # 忽略比指定时间更旧的文件
+    clean_inactive: 48h  # 清除超过指定时间未活跃的文件状态
+    clean_removed: true # 在文件被删除后清除其状态
+    backoff: 1s #无新事件时的初始等待时间
+    max_backoff: 10s  # 无新事件时的最大等待时间
+    backoff_factor: 2  # 用于计算下一次等待时间的指数倍数
+# ============================= output ==================================
+output.kafka:
+  # initial brokers for reading cluster metadata
+  hosts: ["10.0.81.39:9091"]
+  topic: "topic"
+  worker: 1  # 设置工作线程数
+  bulk_max_size: 2048  # 设置批处理最大大小
+  compression: gzip  # 设置压缩类型
+  required_acks: 1
+  timeout: 30s
+  max_retries: 3
+  backoff.init: 1s
+  backoff.max: 60s
+
+# ==============================  modules ==============================
+
+filebeat.config.modules:
+  # Glob pattern for configuration loading
+  path: ${path.config}/modules.d/*.yml
+
+  # Set to true to enable config reloading
+  reload.enabled: false
+
+
+# ================================= Processors =================================
+processors:
+  - add_host_metadata:
+      when.not.contains.tags: forwarded
+  - drop_fields:
+      fields: ["@timestamp","@metadata", "input", "agent", "ecs", "log.file.inode", "log.file.device_id", "host.id", "host.containerized"]
+#  - add_cloud_metadata: ~
+#  - add_docker_metadata: ~
+#  - add_kubernetes_metadata: ~

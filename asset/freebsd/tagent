@@ -1,0 +1,26 @@
+#!/bin/sh
+
+# PROVIDE: my_service
+# REQUIRE: NETWORKING
+# KEYWORD: shutdown
+
+. /etc/rc.subr
+
+name="tagent"
+rcvar="tagent_enable"
+
+start_cmd="${name}_start"
+stop_cmd="${name}_stop"
+
+tagent_start() {
+    echo "Starting tagent..."
+    /opt/ed/agent/agent &
+}
+
+tagent_stop() {
+    echo "Stopping tagent..."
+    killall -TERM tagent
+}
+
+load_rc_config $name
+run_rc_command "$1"
