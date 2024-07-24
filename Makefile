@@ -13,7 +13,7 @@ run:
 	$(GO) run cmd/$(BINARY_NAME)/main.go
 
 package: bindata
-	@GOOS=freebsd GOARCH=amd64 $(GO) build -tags=jsoniter \
+	@GOOS=linux GOARCH=amd64 $(GO) build -tags=jsoniter \
     -o build/$(BINARY_NAME) cmd/$(BINARY_NAME)/main.go
 
 clean:

@@ -33,7 +33,7 @@ filebeat.inputs:
     close_removed: true # 在读取到文件末尾时关闭文件
     close_renamed: false # 在文件被删除时关闭文件
     close_eof: true     #在文件被重命名时关闭文件
-    ignore_older: 2400h  # 忽略比指定时间更旧的文件
+    ignore_older: 24h  # 忽略比指定时间更旧的文件
     clean_inactive: 48h  # 清除超过指定时间未活跃的文件状态
     clean_removed: true # 在文件被删除后清除其状态
     backoff: 1s #无新事件时的初始等待时间

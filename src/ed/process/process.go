@@ -90,8 +90,8 @@ func (sc *SSHConfig) install(ctx context.Context) {
 	log.Info().Msgf("当前主机: %s, 操作系统版本: %s", sc.Host, l)
 	lsEd := sc.RunSudoCommand(fmt.Sprintf("ls  %s", sc.BasePath))
 
-	//针对centos7/8版本
-	if strings.Contains(l, "Linux 7") || strings.Contains(l, "release 7") || strings.Contains(l, "release 8") || strings.Contains(l, "Ubuntu") {
+	//针对centos7/8,ubuntu,suse
+	if strings.Contains(l, "Linux 7") || strings.Contains(l, "release 7") || strings.Contains(l, "release 8") || strings.Contains(l, "Ubuntu") || strings.Contains(l, "opensuse") {
 		if !strings.Contains(lsEd, "tagent.service") {
 			// 上传/opt/ed/config.yml 到指定服务器上
 			err := sc.ScpFile("asset/tagent.service", "tagent.service")
@@ -100,7 +100,7 @@ func (sc *SSHConfig) install(ctx context.Context) {
 				return
 			}
 			sc.RunSudoCommand(
-				"systemctl daemon-reload && rm -rf /lib/systemd/system/tagent.service && rm -rf /etc/systemd/system/multi-user.target.wants/tagent.service && ln -s " + sc.BasePath + "tagent.service /lib/systemd/system/tagent.service && systemctl start tagent && systemctl enable tagent",
+				"systemctl daemon-reload && rm -rf /usr/lib/systemd/system/tagent.service && rm -rf /etc/systemd/system/multi-user.target.wants/tagent.service && ln -s " + sc.BasePath + "tagent.service /usr/lib/systemd/system/tagent.service && systemctl start tagent && systemctl enable tagent",
 			)
 		}
 		// 针对centos6版本
@@ -114,6 +114,7 @@ func (sc *SSHConfig) install(ctx context.Context) {
 		}
 		sc.RunSudoCommand("systemctl daemon-reload && rm -rf /etc/init.d/tagent && ln -s " + sc.BasePath + "tagent /etc/init.d/tagent && chmod +x /etc/init.d/tagent && chkconfig --add tagent && chkconfig tagent on && service tagent start")
 
+		// freebsd系统待验证
 	} else if strings.Contains(l, "FreeBSD 11") {
 		if !strings.Contains(lsEd, "tagent") {
 			err := sc.ScpFile("asset/freebsd/tagent", "tagent")
@@ -137,7 +138,7 @@ func (conf *SSHConfig) uninstall() {
 	// 删除服务文件
 	// 删除centos7/8版本
 	conf.RunSudoCommand(
-		"systemctl disable tagent && systemctl stop tagent && rm -rf /etc/systemd/system/tagent.service && rm -rf /lib/systemd/system/tagent* && rm -rf /etc/systemd/system/multi-user.target.wants/tagent.service",
+		"systemctl disable tagent && systemctl stop tagent && rm -rf /etc/systemd/system/tagent.service && rm -rf /usr/lib/systemd/system/tagent* && rm -rf /etc/systemd/system/multi-user.target.wants/tagent.service",
 	)
 
 	// 删除centos6版本

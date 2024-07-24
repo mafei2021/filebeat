@@ -291,3 +291,4 @@ $RECYCLE.BIN/
 build/*
 cache
 offset
+gen/*
